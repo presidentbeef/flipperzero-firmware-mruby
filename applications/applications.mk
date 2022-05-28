@@ -47,6 +47,7 @@ APP_UPDATER = 1
 # Plugins
 APP_MUSIC_PLAYER = 1
 APP_SNAKE_GAME = 1
+APP_RUBY = 1
 
 # Debug
 APP_ACCESSOR = 1
@@ -231,6 +232,12 @@ endif
 APP_SNAKE_GAME ?= 0
 ifeq ($(APP_SNAKE_GAME), 1)
 CFLAGS		+= -DAPP_SNAKE_GAME
+SRV_GUI		= 1
+endif
+
+APP_RUBY ?= 0
+ifeq ($(APP_RUBY), 1)
+CFLAGS		+= -DAPP_RUBY
 SRV_GUI		= 1
 endif
 
