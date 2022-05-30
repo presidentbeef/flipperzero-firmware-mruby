@@ -133,6 +133,6 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/microtar/src/*.c)
 C_SOURCES		+= $(wildcard $(LIB_DIR)/update_util/*.c)
 
 # mruby
-CFLAGS			+= -I$(LIB_DIR)/mrubyc/src -D MRBC_USE_HAL_USER_RESERVED -Wno-unused-parameter
-CFLAGS			+= -I$(LIB_DIR)/mrubyc/src/hal_user_reserved
+CFLAGS			+= -I$(LIB_DIR)/mrubyc/src -D MRBC_USE_HAL_FLIPPER -Wno-unused-parameter
+CFLAGS			+= -I$(LIB_DIR)/mrubyc/src/hal_flipper
 C_SOURCES		+= $(wildcard $(LIB_DIR)/mrubyc/src/*.c)
