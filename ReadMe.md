@@ -1,4 +1,9 @@
-# Flipper Zero Firmware
+# Flipper Zero Firmware - with mruby
+
+* You will need mruby-3.0.0 installed
+* In `lib/mrubyc`, run `make mrblib`
+
+# Original Readme
 
 [![Discord](https://img.shields.io/discord/740930220399525928.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](http://flipperzero.one/discord)
 
