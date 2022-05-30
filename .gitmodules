@@ -25,3 +25,5 @@
 [submodule "lib/mrubyc"]
 	path = lib/mrubyc
 	url = https://github.com/presidentbeef/mrubyc.git
+[submodule "lib/mrubyc/"]
+	branch = flipper
