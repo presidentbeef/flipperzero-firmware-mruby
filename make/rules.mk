@@ -64,7 +64,8 @@ $(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).bin
 
 $(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
 	@echo "\tJSON\t" $@
-	@$(PROJECT_ROOT)/scripts/meta.py generate -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
+	@echo $(CFLAGS)
+	@$(PROJECT_ROOT)/scripts/meta.py generate -p $(PROJECT) -DBUILD_DATE $(BUILD_DATE) -DGIT_COMMIT ${GIT_COMMIT} -DGIT_BRANCH ${GIT_BRANCH} -DTARGET 7 > $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $(subst $(PROJECT_ROOT)/, , $<)
