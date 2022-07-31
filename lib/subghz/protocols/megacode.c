@@ -247,7 +247,7 @@ void subghz_protocol_decoder_megacode_feed(void* context, bool level, uint32_t d
     switch(instance->decoder.parser_step) {
     case MegaCodeDecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, subghz_protocol_megacode_const.te_short * 13) <
-                        subghz_protocol_megacode_const.te_delta * 15)) { //10..16ms
+                        subghz_protocol_megacode_const.te_delta * 17)) { //10..16ms
             //Found header MegaCode
             instance->decoder.parser_step = MegaCodeDecoderStepFoundStartBit;
         }
@@ -380,11 +380,10 @@ uint8_t subghz_protocol_decoder_megacode_get_hash_data(void* context) {
 bool subghz_protocol_decoder_megacode_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderMegaCode* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 bool subghz_protocol_decoder_megacode_deserialize(void* context, FlipperFormat* flipper_format) {

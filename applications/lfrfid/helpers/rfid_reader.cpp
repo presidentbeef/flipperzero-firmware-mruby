@@ -25,10 +25,12 @@ void RfidReader::decode(bool polarity) {
     case Type::Normal:
         decoder_em.process_front(polarity, period);
         decoder_hid26.process_front(polarity, period);
+        decoder_ioprox.process_front(polarity, period);
         break;
     case Type::Indala:
         decoder_em.process_front(polarity, period);
         decoder_hid26.process_front(polarity, period);
+        decoder_ioprox.process_front(polarity, period);
         decoder_indala.process_front(polarity, period);
         break;
     }
@@ -37,12 +39,12 @@ void RfidReader::decode(bool polarity) {
 }
 
 bool RfidReader::switch_timer_elapsed() {
-    const uint32_t seconds_to_switch = osKernelGetTickFreq() * 2.0f;
-    return (osKernelGetTickCount() - switch_os_tick_last) > seconds_to_switch;
+    const uint32_t seconds_to_switch = furi_kernel_get_tick_frequency() * 2.0f;
+    return (furi_get_tick() - switch_os_tick_last) > seconds_to_switch;
 }
 
 void RfidReader::switch_timer_reset() {
-    switch_os_tick_last = osKernelGetTickCount();
+    switch_os_tick_last = furi_get_tick();
 }
 
 void RfidReader::switch_mode() {
@@ -107,6 +109,11 @@ bool RfidReader::read(LfrfidKeyType* _type, uint8_t* data, uint8_t data_size, bo
 
     if(decoder_hid26.read(data, data_size)) {
         *_type = LfrfidKeyType::KeyH10301;
+        something_read = true;
+    }
+
+    if(decoder_ioprox.read(data, data_size)) {
+        *_type = LfrfidKeyType::KeyIoProxXSF;
         something_read = true;
     }
 

@@ -108,8 +108,8 @@ void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t
     ManchesterEvent event = ManchesterEventReset;
     switch(instance->decoder.parser_step) {
     case CameAtomoDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_came_atomo_const.te_long * 65) <
-                        subghz_protocol_came_atomo_const.te_delta * 20)) {
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_came_atomo_const.te_long * 60) <
+                        subghz_protocol_came_atomo_const.te_delta * 40)) {
             //Found header CAME
             instance->decoder.parser_step = CameAtomoDecoderStepDecoderData;
             instance->decoder.decode_data = 0;
@@ -301,11 +301,10 @@ uint8_t subghz_protocol_decoder_came_atomo_get_hash_data(void* context) {
 bool subghz_protocol_decoder_came_atomo_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 bool subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat* flipper_format) {

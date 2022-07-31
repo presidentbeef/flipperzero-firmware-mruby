@@ -233,7 +233,7 @@ static void subghz_protocol_scher_khan_check_remote_controller(
         //     break;
 
     default:
-        instance->protocol_name = "Unknown";
+        *protocol_name = "Unknown";
         instance->serial = 0;
         instance->btn = 0;
         instance->cnt = 0;
@@ -251,11 +251,10 @@ uint8_t subghz_protocol_decoder_scher_khan_get_hash_data(void* context) {
 bool subghz_protocol_decoder_scher_khan_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzPresetDefinition* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderScherKhan* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
 bool subghz_protocol_decoder_scher_khan_deserialize(void* context, FlipperFormat* flipper_format) {
