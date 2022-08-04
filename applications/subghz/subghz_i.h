@@ -1,5 +1,6 @@
 #pragma once
 
+#include "helpers/subghz_types.h"
 #include "subghz.h"
 #include "views/receiver.h"
 #include "views/transmitter.h"
@@ -10,8 +11,8 @@
 #include "views/subghz_test_carrier.h"
 #include "views/subghz_test_packet.h"
 
-#include <furi.h>
-#include <furi_hal.h>
+// #include <furi.h>
+// #include <furi_hal.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
@@ -35,53 +36,9 @@
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
 
-#define SUBGHZ_MAX_LEN_NAME 250
+#include "rpc/rpc_app.h"
 
-/** SubGhzNotification state */
-typedef enum {
-    SubGhzNotificationStateStarting,
-    SubGhzNotificationStateIDLE,
-    SubGhzNotificationStateTx,
-    SubGhzNotificationStateRx,
-    SubGhzNotificationStateRxDone,
-} SubGhzNotificationState;
-
-/** SubGhzTxRx state */
-typedef enum {
-    SubGhzTxRxStateIDLE,
-    SubGhzTxRxStateRx,
-    SubGhzTxRxStateTx,
-    SubGhzTxRxStateSleep,
-} SubGhzTxRxState;
-
-/** SubGhzHopperState state */
-typedef enum {
-    SubGhzHopperStateOFF,
-    SubGhzHopperStateRunnig,
-    SubGhzHopperStatePause,
-    SubGhzHopperStateRSSITimeOut,
-} SubGhzHopperState;
-
-/** SubGhzRxKeyState state */
-typedef enum {
-    SubGhzRxKeyStateIDLE,
-    SubGhzRxKeyStateNoSave,
-    SubGhzRxKeyStateNeedSave,
-    SubGhzRxKeyStateBack,
-    SubGhzRxKeyStateStart,
-    SubGhzRxKeyStateAddKey,
-    SubGhzRxKeyStateExit,
-    SubGhzRxKeyStateRAWLoad,
-    SubGhzRxKeyStateRAWSave,
-} SubGhzRxKeyState;
-
-/** SubGhzLoadKeyState state */
-typedef enum {
-    SubGhzLoadKeyStateUnknown,
-    SubGhzLoadKeyStateOK,
-    SubGhzLoadKeyStateParseErr,
-    SubGhzLoadKeyStateOnlyRx,
-} SubGhzLoadKeyState;
+#define SUBGHZ_MAX_LEN_NAME 64
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -92,8 +49,7 @@ struct SubGhzTxRx {
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
 
-    uint32_t frequency;
-    FuriHalSubGhzPreset preset;
+    SubGhzPresetDefinition* preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
     SubGhzTxRxState txrx_state;
@@ -119,10 +75,9 @@ struct SubGhz {
     TextInput* text_input;
     Widget* widget;
     DialogsApp* dialogs;
-    char file_path[SUBGHZ_MAX_LEN_NAME + 1];
-    char file_path_tmp[SUBGHZ_MAX_LEN_NAME + 1];
-    //ToDo you can get rid of it, you need to refactor text input to return the path to the folder
-    char file_dir[SUBGHZ_MAX_LEN_NAME + 1];
+    string_t file_path;
+    string_t file_path_tmp;
+    char file_name_tmp[SUBGHZ_MAX_LEN_NAME];
     SubGhzNotificationState state_notifications;
 
     SubGhzViewReceiver* subghz_receiver;
@@ -136,34 +91,31 @@ struct SubGhz {
     SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
     SubGhzSetting* setting;
+    SubGhzLock lock;
+
+    void* rpc_ctx;
 };
 
-typedef enum {
-    SubGhzViewIdMenu,
-    SubGhzViewIdReceiver,
-    SubGhzViewIdPopup,
-    SubGhzViewIdTextInput,
-    SubGhzViewIdWidget,
-    SubGhzViewIdTransmitter,
-    SubGhzViewIdVariableItemList,
-    SubGhzViewIdFrequencyAnalyzer,
-    SubGhzViewIdReadRAW,
-
-    SubGhzViewIdStatic,
-    SubGhzViewIdTestCarrier,
-    SubGhzViewIdTestPacket,
-} SubGhzViewId;
-
+void subghz_preset_init(
+    void* context,
+    const char* preset_name,
+    uint32_t frequency,
+    uint8_t* preset_data,
+    size_t preset_data_size);
 bool subghz_set_preset(SubGhz* subghz, const char* preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation);
-void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset);
+void subghz_begin(SubGhz* subghz, uint8_t* preset_data);
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency);
 void subghz_rx_end(SubGhz* subghz);
 void subghz_sleep(SubGhz* subghz);
+
+void subghz_blink_start(SubGhz* instance);
+void subghz_blink_stop(SubGhz* instance);
+
 bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
 void subghz_tx_stop(SubGhz* subghz);
 void subghz_dialog_message_show_only_rx(SubGhz* subghz);
-bool subghz_key_load(SubGhz* subghz, const char* file_path);
+bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog);
 bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len);
 bool subghz_save_protocol_to_file(
     SubGhz* subghz,
@@ -173,5 +125,6 @@ bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
 bool subghz_delete_file(SubGhz* subghz);
 void subghz_file_name_clear(SubGhz* subghz);
+bool subghz_path_is_file(string_t path);
 uint32_t subghz_random_serial(void);
 void subghz_hopper_update(SubGhz* subghz);

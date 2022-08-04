@@ -14,9 +14,8 @@
 #include <gui/modules/widget.h>
 #include "views/bad_usb_view.h"
 
-#define BAD_USB_APP_PATH_FOLDER "/any/badusb"
+#define BAD_USB_APP_PATH_FOLDER ANY_PATH("badusb")
 #define BAD_USB_APP_EXTENSION ".txt"
-#define BAD_USB_FILE_NAME_LEN 40
 
 typedef enum {
     BadUsbAppErrorNoFiles,
@@ -32,7 +31,7 @@ struct BadUsbApp {
     Widget* widget;
 
     BadUsbAppError error;
-    char file_name[BAD_USB_FILE_NAME_LEN + 1];
+    string_t file_path;
     BadUsb* bad_usb_view;
     BadUsbScript* bad_usb_script;
 };
