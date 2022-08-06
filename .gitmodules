@@ -27,3 +27,9 @@
 	url = https://github.com/presidentbeef/mrubyc.git
 [submodule "lib/mrubyc/"]
 	branch = flipper
+[submodule "lib/scons"]
+	path = lib/scons
+	url = https://github.com/SCons/scons.git
+[submodule "lib/mbedtls"]
+	path = lib/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git
