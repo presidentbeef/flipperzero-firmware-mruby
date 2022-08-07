@@ -25,7 +25,7 @@ int32_t ruby_app(void* p)
       file_path,
       "mrb",
       true,
-      &I_music_10px,
+      &I_ruby_10px,
       false);
 
   furi_record_close("dialogs");

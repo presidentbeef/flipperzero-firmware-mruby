@@ -6,6 +6,6 @@ App(
     cdefines=["APP_RUBY"],
     requires=[],
     stack_size=30 * 1024,
-    icon="A_Plugins_14",
+    icon="A_Ruby_14",
     order=900,
 )
