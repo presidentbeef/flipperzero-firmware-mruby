@@ -201,6 +201,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "misc",
         "mbedtls",
         "loclass",
+	"mrubyc",
         # 2nd round
         "flipperformat",
         "toolbox",

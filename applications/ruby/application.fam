@@ -1,0 +1,11 @@
+App(
+    appid="ruby",
+    name="Ruby",
+    apptype=FlipperAppType.APP,
+    entry_point="ruby_app",
+    cdefines=["APP_RUBY"],
+    requires=[],
+    stack_size=30 * 1024,
+    icon="A_Plugins_14",
+    order=900,
+)

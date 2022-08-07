@@ -1,0 +1,25 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/mrubyc/src",
+	"#/lib/mrubyc/src/hal_flipper"
+    ],
+)
+
+
+libenv = env.Clone(FW_LIB_NAME="mrubyc")
+libenv.ApplyLibFlags()
+
+libenv.Append(
+    CPPFLAGS=[
+	"-Wno-unused-parameter",
+    ]
+)
+
+sources = Glob("mrubyc/src/*.c", source=True)
+print(sources)
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

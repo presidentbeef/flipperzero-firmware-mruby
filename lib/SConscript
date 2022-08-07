@@ -36,6 +36,7 @@ env.Append(
 # flipper_format
 # infrared
 # littlefs
+# mrubyc
 # subghz
 # toolbox
 # misc
@@ -75,6 +76,7 @@ libs = env.BuildModules(
         "misc",
         "mbedtls",
         "loclass",
+	"mrubyc",
     ],
 )
 
