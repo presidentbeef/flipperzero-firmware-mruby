@@ -18,7 +18,6 @@ libenv.Append(
 )
 
 sources = Glob("mrubyc/src/*.c", source=True)
-print(sources)
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
