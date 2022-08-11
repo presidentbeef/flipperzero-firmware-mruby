@@ -3,7 +3,7 @@ Import("env")
 env.Append(
     CPPPATH=[
         "#/lib/mrubyc/src",
-	"#/lib/mrubyc/src/hal_flipper"
+        "#/lib/mrubyc/src/hal_flipper"
     ],
 )
 
@@ -13,12 +13,11 @@ libenv.ApplyLibFlags()
 
 libenv.Append(
     CPPFLAGS=[
-	"-Wno-unused-parameter",
+      	"-Wno-unused-parameter",
     ]
 )
 
 sources = Glob("mrubyc/src/*.c", source=True)
-print(sources)
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
