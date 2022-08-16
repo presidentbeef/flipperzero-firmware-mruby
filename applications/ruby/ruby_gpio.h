@@ -1,13 +1,7 @@
 #include "mrubyc.h"
 #include <furi_hal_resources.h>
 
-static void c_gpio_hello(mrb_vm *vm, mrb_value v[], int argc)
-{
-  UNUSED(vm);
-  UNUSED(v);
-  UNUSED(argc);
-  printf("Hello!\n");
-}
+#define TAG "Ruby GPIO"
 
 static const GpioPin* index_to_pin(int index)
 {

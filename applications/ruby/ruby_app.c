@@ -75,3 +75,5 @@ int32_t ruby_app(void* p)
 
   return 0;
 }
+
+#undef TAG
