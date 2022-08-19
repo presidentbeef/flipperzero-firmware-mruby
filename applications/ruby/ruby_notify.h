@@ -41,10 +41,42 @@ static void c_ruby_notify_led(mrb_vm *vm, mrb_value v[], int argc)
   }
 }
 
+static void c_ruby_notify_vibrate_on(mrb_vm *vm, mrb_value v[], int argc)
+{
+  UNUSED(v);
+  if( argc != 0 )
+  {
+    mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
+  }
+  else
+  {
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message_block(notification, &sequence_set_vibro_on);
+    furi_record_close(RECORD_NOTIFICATION);
+  }
+}
+
+static void c_ruby_notify_vibrate_off(mrb_vm *vm, mrb_value v[], int argc)
+{
+  UNUSED(v);
+  if( argc != 0 )
+  {
+    mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
+  }
+  else
+  {
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message_block(notification, &sequence_reset_vibro);
+    furi_record_close(RECORD_NOTIFICATION);
+  }
+}
+
 void make_mruby_notify_class(mrb_vm *vm)
 {
   mrb_class *cls = mrbc_define_class(vm, "Notify", mrbc_class_object);
   mrbc_define_method(vm, cls, "led", c_ruby_notify_led);
+  mrbc_define_method(vm, cls, "vibrate_start", c_ruby_notify_vibrate_on);
+  mrbc_define_method(vm, cls, "vibrate_stop", c_ruby_notify_vibrate_off);
 }
 
 #undef TAG
