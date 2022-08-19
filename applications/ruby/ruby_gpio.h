@@ -73,7 +73,6 @@ static void c_gpio_write(mrb_vm *vm, mrb_value v[], int argc)
 void make_gpio_class(mrb_vm *vm)
 {
   mrb_class *cls = mrbc_define_class(vm, "GPIO", mrbc_class_object);
-  mrbc_define_method(vm, cls, "hello", c_gpio_hello);
   mrbc_define_method(vm, cls, "set_input", c_gpio_set_input);
   mrbc_define_method(vm, cls, "set_output", c_gpio_set_output);
   mrbc_define_method(vm, cls, "write_output", c_gpio_write);
