@@ -21,7 +21,7 @@ static const GpioPin* index_to_pin(int index)
     case 15 :
       return &gpio_ext_pc1;
     case 16 :
-      return &gpio_ext_pb0;
+      return &gpio_ext_pc0;
   }
 
   FURI_LOG_E(TAG, "What Pin?");
