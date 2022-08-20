@@ -3,6 +3,8 @@
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 #include "mrubyc.h"
+#include "ruby_gpio.h"
+#include "ruby_notify.h"
 
 #define MEMORY_SIZE (1024*30)
 static uint8_t memory_pool[MEMORY_SIZE];
@@ -54,8 +56,12 @@ int32_t ruby_app(void* p)
   FURI_LOG_I(TAG, "Starting Ruby!!!");
   mrbc_init(memory_pool, MEMORY_SIZE);
 
-  if( mrbc_create_task(ruby_test, 0) != NULL ){
+  mrbc_tcb *mrb_task = mrbc_create_task(ruby_test, 0);
+
+  if( mrb_task != NULL ){
     FURI_LOG_I(TAG, "Running Ruby!!!");
+    make_gpio_class(&mrb_task->vm);
+    make_mruby_notify_class(&mrb_task->vm);
     mrbc_run();
   }
   else {
@@ -71,3 +77,5 @@ int32_t ruby_app(void* p)
 
   return 0;
 }
+
+#undef TAG
