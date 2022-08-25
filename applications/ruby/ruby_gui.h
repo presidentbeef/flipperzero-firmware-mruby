@@ -12,7 +12,10 @@ static void c_ruby_gui_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 
-static void c_ruby_gui_render_callback(Canvas* canvas, void* text) {
+static void c_ruby_gui_render_callback(Canvas* canvas, void* gui) {
+  mrb_value display_text = mrbc_instance_getiv(gui, mrbc_str_to_symid("display_text"));
+  char* text = RSTRING_PTR(display_text);
+
   elements_multiline_text_aligned(
       canvas,
       0,
@@ -23,19 +26,17 @@ static void c_ruby_gui_render_callback(Canvas* canvas, void* text) {
 }
 
 static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
-  if( argc != 1 )
+  if( argc != 0 )
   {
     mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
     return;
   }
 
-  char* text = RSTRING_PTR(v[1]);
-
   FuriMessageQueue* event_queue = furi_message_queue_alloc(32, sizeof(InputEvent));
   furi_check(event_queue);
 
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, c_ruby_gui_render_callback, text);
+  view_port_draw_callback_set(view_port, c_ruby_gui_render_callback, &v[0]);
   view_port_input_callback_set(view_port, c_ruby_gui_input_callback, event_queue);
 
   // Open GUI and register view_port
@@ -63,7 +64,7 @@ static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
 void make_ruby_gui_class(mrb_vm *vm)
 {
   mrb_class *cls = mrbc_define_class(vm, "GUI", mrbc_class_object);
-  mrbc_define_method(vm, cls, "hello", c_ruby_gui_hello);
+  mrbc_define_method(vm, cls, "start", c_ruby_gui_hello);
 }
 
 
