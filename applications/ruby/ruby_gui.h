@@ -7,29 +7,35 @@
 #define TAG "Ruby GUI"
 
 static void c_ruby_gui_input_callback(InputEvent* input_event, void* ctx) {
-    FuriMessageQueue* event_queue = ctx;
-    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+  FuriMessageQueue* event_queue = ctx;
+  furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
 
-static void c_ruby_gui_render_callback(Canvas* canvas, void* ctx) {
-  UNUSED(ctx);
-    elements_multiline_text(
-        canvas,
-        0,
-        0,
-        "\e#Never\e# gonna give you up\n\e!Never\e! gonna let you down");
+static void c_ruby_gui_render_callback(Canvas* canvas, void* text) {
+  elements_multiline_text_aligned(
+      canvas,
+      0,
+      0,
+      AlignLeft,
+      AlignTop,
+      text);
 }
 
 static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
-  UNUSED(vm);
-  UNUSED(v);
-  UNUSED(argc);
+  if( argc != 1 )
+  {
+    mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
+    return;
+  }
+
+  char* text = RSTRING_PTR(v[1]);
+
   FuriMessageQueue* event_queue = furi_message_queue_alloc(32, sizeof(InputEvent));
   furi_check(event_queue);
 
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, c_ruby_gui_render_callback, NULL);
+  view_port_draw_callback_set(view_port, c_ruby_gui_render_callback, text);
   view_port_input_callback_set(view_port, c_ruby_gui_input_callback, event_queue);
 
   // Open GUI and register view_port
