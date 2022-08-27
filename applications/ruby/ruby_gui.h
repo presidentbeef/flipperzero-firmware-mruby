@@ -25,6 +25,36 @@ static void c_ruby_gui_render_callback(Canvas* canvas, void* gui) {
       text);
 }
 
+static void invoke_method(mrb_vm *vm, mrb_value v[], int argc, char* method_name) {
+
+  mrbc_class *cls = v[0].instance->cls;
+  if( cls == NULL) {
+    FURI_LOG_I(TAG, "Got no class");
+    return;
+  }
+
+  mrbc_sym method_sym = mrbc_str_to_symid(method_name);
+  if( method_sym == -1) {
+    FURI_LOG_I(TAG, "Got no symbolism");
+    return;
+  } else {
+    FURI_LOG_I(TAG, "Got symbol");
+  }
+
+  mrbc_method method;
+  if( mrbc_find_method( &method, cls, method_sym ) == NULL ) return;
+
+
+//  mrbc_decref(&v[argc+1]);
+//  mrbc_set_nil(&v[argc+1]);
+  mrbc_callinfo *callinfo = mrbc_push_callinfo(vm, method_sym, (v - vm->cur_regs), argc);
+
+  callinfo->own_class = method.cls;
+  vm->cur_irep = method.irep;
+  vm->inst = vm->cur_irep->inst;
+  vm->cur_regs = v;
+}
+
 static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
   if( argc != 0 )
   {
@@ -46,9 +76,13 @@ static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
   InputEvent event;
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         if(event.type == InputTypeShort) {
-            if(event.key == InputKeyBack) {
-                break;
-            }
+          //char* key_name = input_get_key_name(event.key);
+
+          invoke_method(vm, v, argc, "handle_input");
+
+          if(event.key == InputKeyBack) {
+            break;
+          }
         }
 
         view_port_update(view_port);
