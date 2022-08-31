@@ -11,36 +11,39 @@ typedef struct GUIState {
   ViewPort *view_port;
   Gui *gui;
   mrb_value *rgui;
+  char *display_text;
 } GUIState;
 
-static ValueMutex gui_mutex;
+static void c_ruby_gui_goodbye(ValueMutex *gui_mutex);
 
-static void c_ruby_gui_goodbye(GUIState *state);
-
-static void c_ruby_gui_input_callback(InputEvent* input_event, void* ctx) {
-  UNUSED(ctx);
-
+static void c_ruby_gui_input_callback(InputEvent* input_event, void* gui_mutex) {
   FURI_LOG_I(TAG, "Input Callback");
 
-  GUIState *state = (GUIState*)acquire_mutex(&gui_mutex, 25);
-  release_mutex(&gui_mutex, state);
+  GUIState *state = (GUIState*)acquire_mutex((ValueMutex*)gui_mutex, 25);
+  release_mutex((ValueMutex*)gui_mutex, state);
+
   if(input_event->key == InputKeyBack) {
-    c_ruby_gui_goodbye(state);
+    c_ruby_gui_goodbye(gui_mutex);
   }
-  
 }
 
-static void c_ruby_gui_render_callback(Canvas* canvas, void* ctx) {
-  UNUSED(ctx);
-  UNUSED(canvas);
-
+static void c_ruby_gui_render_callback(Canvas* canvas, void* gui_mutex) {
   FURI_LOG_I(TAG, "Render Callback");
-  GUIState *state = (GUIState*)acquire_mutex(&gui_mutex, 25);
-  release_mutex(&gui_mutex, state);
+  GUIState *state = (GUIState*)acquire_mutex((ValueMutex*)gui_mutex, 25);
+  char *text = state->display_text;
+  release_mutex((ValueMutex*)gui_mutex, state);
+  FURI_LOG_I(TAG, "Render mutexed");
+  furi_check(state);
+  /*
   mrb_value* gui = state->rgui;
+  FURI_LOG_I(TAG, "Render rgui value");
+  release_mutex((ValueMutex*)gui_mutex, state);
+  FURI_LOG_I(TAG, "Render released mutex");
   mrb_value display_text = mrbc_instance_getiv(gui, mrbc_str_to_symid("display_text"));
+  FURI_LOG_I(TAG, "Got display text");
   char* text = RSTRING_PTR(display_text);
   FURI_LOG_I(TAG, "Display: %d", mrbc_integer(display_text));
+  */
 
   elements_multiline_text_aligned(
       canvas,
@@ -52,7 +55,7 @@ static void c_ruby_gui_render_callback(Canvas* canvas, void* ctx) {
 }
 
 static void c_ruby_gui_set_text(mrb_vm *vm, mrb_value v[], int argc) {
-  if( argc != 1 )
+  if( argc != 2 )
   {
     mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
     return;
@@ -64,9 +67,36 @@ static void c_ruby_gui_set_text(mrb_vm *vm, mrb_value v[], int argc) {
   FURI_LOG_I(TAG, "Before: %s", text);
   mrbc_instance_setiv(&v[0], mrbc_str_to_symid("display_text"), &v[1]);
 
-  GUIState *state = (GUIState*)acquire_mutex(&gui_mutex, 25);
-  release_mutex(&gui_mutex, state);
+  ValueMutex *gui_mutex = v[2].handle;
+  furi_check(gui_mutex);
+  GUIState *state = (GUIState*)acquire_mutex(gui_mutex, 25);
+  state->display_text = text;
+  release_mutex(gui_mutex, state);
+
+  FURI_LOG_I(TAG, "Got text");
+}
+
+static void c_ruby_gui_update_view(mrb_vm *vm, mrb_value v[], int argc) {
+  UNUSED(vm);
+  UNUSED(argc);
+
+  if( argc != 1 )
+  {
+    mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
+    return;
+  }
+
+  FURI_LOG_I(TAG, "Hello update view");
+  FURI_LOG_I(TAG, "Type is %d", v[1].tt);
+  ValueMutex *gui_mutex = v[1].handle;
+  furi_check(gui_mutex);
+  FURI_LOG_I(TAG, "Handle...");
+  GUIState *state = (GUIState*)acquire_mutex(gui_mutex, 25);
+  FURI_LOG_I(TAG, "Got mutex");
   view_port_update(state->view_port);
+  FURI_LOG_I(TAG, "Updated view port");
+  release_mutex(gui_mutex, state);
+  FURI_LOG_I(TAG, "Released mutex from update");
 }
 
 /*
@@ -111,29 +141,24 @@ static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
   FURI_LOG_I(TAG, "Hmmm");
 
   GUIState* gui_state = malloc(sizeof(GUIState));
-  FURI_LOG_I(TAG, "1");
   gui_state->event_queue = event_queue;
-  FURI_LOG_I(TAG, "2");
   gui_state->view_port = view_port;
-  FURI_LOG_I(TAG, "3");
   gui_state->gui = gui;
-  FURI_LOG_I(TAG, "4");
   gui_state->rgui = &v[0];
-  FURI_LOG_I(TAG, "5");
-
-  FURI_LOG_I(TAG, "Init the mutex!");
 
   //Stick the object in a mutex
-  if (!init_mutex(&gui_mutex, gui_state, sizeof(GUIState))) {
+  ValueMutex *gui_mutex = malloc(sizeof(ValueMutex));
+  if (!init_mutex(gui_mutex, gui_state, sizeof(GUIState))) {
     FURI_LOG_E(TAG, "FAILED MUTEX");
     free(gui_state);
+    free(gui_mutex);
     return;
   }
 
   FURI_LOG_I(TAG, "Did it...");
 
-  view_port_draw_callback_set(view_port, c_ruby_gui_render_callback, NULL);
-  view_port_input_callback_set(view_port, c_ruby_gui_input_callback, NULL);
+  view_port_draw_callback_set(view_port, c_ruby_gui_render_callback, gui_mutex);
+  view_port_input_callback_set(view_port, c_ruby_gui_input_callback, gui_mutex);
 
   /*
   InputEvent event;
@@ -159,16 +184,21 @@ static void c_ruby_gui_hello(mrb_vm *vm, mrb_value v[], int argc) {
    */
 
   FURI_LOG_I(TAG, "Started GUI stuff?");
+  mrbc_value rv = {.tt = MRBC_TT_HANDLE};
+  rv.handle = gui_mutex;
+  SET_RETURN(rv);
 }
 
-static void c_ruby_gui_goodbye(GUIState *gui_state) {
+static void c_ruby_gui_goodbye(ValueMutex *gui_mutex) {
   FURI_LOG_I(TAG, "Ending GUI stuff");
 
+  GUIState *gui_state = (GUIState*)acquire_mutex(gui_mutex, 25);
   gui_remove_view_port(gui_state->gui, gui_state->view_port);
   view_port_free(gui_state->view_port);
   furi_message_queue_free(gui_state->event_queue);
   furi_record_close(RECORD_GUI);
-  delete_mutex(&gui_mutex);
+  delete_mutex(gui_mutex);
+  free(gui_state);
 }
 
 void make_ruby_gui_class(mrb_vm *vm)
@@ -176,7 +206,7 @@ void make_ruby_gui_class(mrb_vm *vm)
   mrb_class *cls = mrbc_define_class(vm, "GUI", mrbc_class_object);
   mrbc_define_method(vm, cls, "start", c_ruby_gui_hello);
   mrbc_define_method(vm, cls, "set_text", c_ruby_gui_set_text);
+  mrbc_define_method(vm, cls, "update_view", c_ruby_gui_update_view);
 }
-
 
 #undef TAG
