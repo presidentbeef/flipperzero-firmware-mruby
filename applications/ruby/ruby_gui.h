@@ -169,6 +169,12 @@ static void c_ruby_gui_goodbye(mrb_vm *vm, mrb_value v[], int argc) {
   UNUSED(vm);
   UNUSED(argc);
 
+  if( argc != 1 )
+  {
+    mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
+    return;
+  }
+
   ValueMutex *gui_mutex = v[1].handle;
   GUIState *gui_state = (GUIState*)acquire_mutex(gui_mutex, 25);
   view_port_enabled_set(gui_state->view_port, false);

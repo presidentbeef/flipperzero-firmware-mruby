@@ -9,14 +9,22 @@ class GUI
       dispatch_input
     end
 
-    close
+    close(@c_gui)
+  end
+
+  def close_gui
+    @running = false
+  end
+
+  def display_text(text)
+    set_text(text, @c_gui)
   end
 
   def dispatch_input
-    input = fetch_input
+    input = fetch_input(@c_gui)
     return if input.nil?
 
-    handle_input(input)
+    handle_input(input.to_sym)
   end
 
   def handle_input
