@@ -18,7 +18,7 @@ static void c_ruby_led_on(mrb_vm *vm, mrbc_value v[], int argc) {
   int red = 0;
   int green = 0;
   int blue = 0;
-  
+ 
   mrbc_value red_sym = mrbc_symbol_value(mrbc_str_to_symid("red"));
   mrbc_value red_value = mrbc_hash_get(&opt_hash, &red_sym);
 
@@ -61,14 +61,46 @@ static void c_ruby_led_on(mrb_vm *vm, mrbc_value v[], int argc) {
   furi_record_close(RECORD_NOTIFICATION);
 
   SET_NIL_RETURN();
-} 
+}
+
+static void c_ruby_led_off(mrb_vm *vm, mrbc_value v[], int argc) {
+  if( argc != 0 )
+  {
+    mrbc_raise( vm, MRBC_CLASS(ArgumentError), 0 );
+  }
+
+  NotificationMessage notification_led_message_red;
+  NotificationMessage notification_led_message_green;
+  NotificationMessage notification_led_message_blue;
+
+  notification_led_message_red.type = NotificationMessageTypeLedRed;
+  notification_led_message_red.data.led.value = 0;
+
+  notification_led_message_green.type = NotificationMessageTypeLedGreen;
+  notification_led_message_green.data.led.value = 0;
+
+  notification_led_message_blue.type = NotificationMessageTypeLedBlue;
+  notification_led_message_blue.data.led.value = 0;
+
+  const NotificationSequence notification_sequence = {
+    &notification_led_message_red,
+    &notification_led_message_blue,
+    &notification_led_message_green,
+    NULL,
+  };
+
+  NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+  notification_internal_message_block(notification, &notification_sequence);
+  furi_record_close(RECORD_NOTIFICATION);
+
+  SET_NIL_RETURN();
+}
 
 void make_ruby_led_class(mrb_vm *vm)
 {
   mrb_class *cls = mrbc_define_class(vm, "LED", mrbc_class_object);
   mrbc_define_method(vm, cls, "on", c_ruby_led_on);
-  //mrbc_define_method(vm, cls, "off", c_ruby_led_off);
+  mrbc_define_method(vm, cls, "off", c_ruby_led_off);
 }
-
 
 #undef TAG
