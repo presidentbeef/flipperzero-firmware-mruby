@@ -6,6 +6,7 @@
 #include "ruby_gpio.h"
 #include "ruby_notify.h"
 #include "ruby_gui.h"
+#include "ruby_led.h"
 
 #define MEMORY_SIZE (1024*30)
 static uint8_t memory_pool[MEMORY_SIZE];
@@ -64,6 +65,7 @@ int32_t ruby_app(void* p)
     make_gpio_class(&mrb_task->vm);
     make_ruby_gui_class(&mrb_task->vm);
     make_mruby_notify_class(&mrb_task->vm);
+    make_ruby_led_class(&mrb_task->vm);
     mrbc_run();
   }
   else {
