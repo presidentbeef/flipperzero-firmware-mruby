@@ -1,7 +1,29 @@
 # Flipper Zero Firmware - with mruby
 
+
+## Setup
+
+* Clone this repo `git clone https://github.com/presidentbeef/flipperzero-firmware-mruby.git`
 * You will need mruby-3.0.0 installed
-* In `lib/mrubyc`, run `make mrblib`
+* Download [qFlipper](https://flipperzero.one/update) and move it to the `flipperzero-firmware-mruby` directory 
+
+## Build
+
+Plug in your Flipper to the computer.
+
+* In `lib/mrubyc`, run `make mrblib` (Only need to do this once)
+* In the root directory, run `./fbt COMPACT=True DEBUG=False` to build the firmware
+* Run `./qFlipper-x86_64-1.2.1.AppImage cli firmware dist/f7-DC/flipper-z-f7-full-local.dfu` to load the firmware onto the Flipper
+
+## Running Ruby Programs
+
+Use mruby 3.0.0 to compile programs to mrb bytecode:
+
+* `mrubc my_app.rb`
+
+Use the qFlipper GUI to copy the file (e.g. `my_app.mrb`) to the Flipper.
+
+Then use the Ruby application on the Flipper to run your Ruby bytecode!
 
 # Original Readme
 
