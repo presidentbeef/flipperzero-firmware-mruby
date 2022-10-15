@@ -4,7 +4,7 @@
 ## Setup
 
 * Clone this repo `git clone https://github.com/presidentbeef/flipperzero-firmware-mruby.git`
-* You will need mruby-3.0.0 installed
+* You will need mruby-3.1.0 installed
 * Download [qFlipper](https://flipperzero.one/update) and move it to the `flipperzero-firmware-mruby` directory 
 
 ## Build
@@ -19,7 +19,7 @@ Plug in your Flipper to the computer.
 
 Use mruby 3.0.0 to compile programs to mrb bytecode:
 
-* `mrubc my_app.rb`
+* `mrbc my_app.rb`
 
 Use the qFlipper GUI to copy the file (e.g. `my_app.mrb`) to the Flipper.
 
